@@ -1,0 +1,17 @@
+# use container-based Ubuntu Trusty
+dist: bionic
+sudo: true
+
+language: python
+python:
+  - "3.6.8"
+
+services:
+  - docker
+
+install:
+  - pip install poetry
+  - poetry install --dev
+
+script:
+  - flake8
