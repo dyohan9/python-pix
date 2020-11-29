@@ -27,6 +27,21 @@ class Pix(object):
         self.txid = None
         self.amount = None
 
+    def __str__(self):
+        payload = "{}{}{}{}{}{}{}{}{}".format(
+            self.get_value(self._ID_PAYLOAD_FORMAT_INDICATOR, "01"),
+            self.get_merchant_account_information(),
+            self.get_value(self._ID_MERCHANT_CATEGORY_CODE, "0000"),
+            self.get_value(self._ID_TRANSACTION_CURRENCY, "986"),
+            self.get_value(self._ID_TRANSACTION_AMOUNT, self.amount),
+            self.get_value(self._ID_COUNTRY_CODE, self.country_code),
+            self.get_value(self._ID_MERCHANT_NAME, self.merchant_name),
+            self.get_value(self._ID_MERCHANT_CITY, self.merchant_city),
+            self.get_additional_data_field_template(),
+        )
+
+        return "{}{}".format(payload, self.get_crc16(payload))
+
     def set_pixkey(self, pixkey: str):
         self.pixkey = pixkey
 
@@ -95,18 +110,3 @@ class Pix(object):
                 else:
                     crc = crc << 1
         return "{}{}{}".format(self._ID_CRC16, "04", self.toHex(crc & 0xFFFF).upper())
-
-    def get_payload(self):
-        payload = "{}{}{}{}{}{}{}{}{}".format(
-            self.get_value(self._ID_PAYLOAD_FORMAT_INDICATOR, "01"),
-            self.get_merchant_account_information(),
-            self.get_value(self._ID_MERCHANT_CATEGORY_CODE, "0000"),
-            self.get_value(self._ID_TRANSACTION_CURRENCY, "986"),
-            self.get_value(self._ID_TRANSACTION_AMOUNT, self.amount),
-            self.get_value(self._ID_COUNTRY_CODE, self.country_code),
-            self.get_value(self._ID_MERCHANT_NAME, self.merchant_name),
-            self.get_value(self._ID_MERCHANT_CITY, self.merchant_city),
-            self.get_additional_data_field_template(),
-        )
-
-        return "{}{}".format(payload, self.get_crc16(payload))
