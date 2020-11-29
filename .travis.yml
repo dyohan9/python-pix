@@ -10,6 +10,7 @@ services:
   - docker
 
 install:
+  - pip install -U pip==20.2.2 setuptools==49.6.0
   - pip install poetry
   - poetry install
 
