@@ -1,7 +1,7 @@
 Python Pix
 ==========================
 
-[![pypi](https://img.shields.io/pypi/v/google-auth.svg)](https://pypi.python.org/pypi/google-auth)
+[![pypi](https://img.shields.io/pypi/v/pypix.svg)](https://pypi.org/project/pypix/)
 [![Build Status](https://travis-ci.com/dyohan9/python-pix.svg?branch=master)](https://travis-ci.com/dyohan9/python-pix)
 [![Python Version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://www.python.org/)
 [![License GPL-3.0](https://img.shields.io/badge/license-%20GPL--3.0-yellow.svg)](https://github.com/bothub-it/bothub-engine/blob/master/LICENSE)
