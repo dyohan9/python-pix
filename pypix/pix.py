@@ -5,6 +5,7 @@ class Pix(object):
         https://www.bcb.gov.br/content/estabilidadefinanceira/spb_docs/ManualBRCode.pdf
         """
         self._ID_PAYLOAD_FORMAT_INDICATOR = "00"
+        # Removido _ID_POINT_OF_INITIATION_METHOD para compatibilidade com Bradesco
         self._ID_MERCHANT_ACCOUNT_INFORMATION = "26"
         self._ID_MERCHANT_ACCOUNT_INFORMATION_GUI = "00"
         self._ID_MERCHANT_ACCOUNT_INFORMATION_KEY = "01"
@@ -28,30 +29,46 @@ class Pix(object):
         self.amount = None
 
     def __str__(self):
+        # Validar campos obrigatórios antes de gerar o código
+        self.validate()
+        
+        # Formato compatível com o Bradesco (sem o campo Point of Initiation Method)
         payload = "{}{}{}{}{}{}{}{}{}".format(
             self.get_value(self._ID_PAYLOAD_FORMAT_INDICATOR, "01"),
             self.get_merchant_account_information(),
             self.get_value(self._ID_MERCHANT_CATEGORY_CODE, "0000"),
             self.get_value(self._ID_TRANSACTION_CURRENCY, "986"),
-            self.get_value(self._ID_TRANSACTION_AMOUNT, self.amount),
+            self.get_value(self._ID_TRANSACTION_AMOUNT, self.amount) if self.amount else "",
             self.get_value(self._ID_COUNTRY_CODE, self.country_code),
-            self.get_value(self._ID_MERCHANT_NAME, self.merchant_name),
-            self.get_value(self._ID_MERCHANT_CITY, self.merchant_city),
+            self.get_value(self._ID_MERCHANT_NAME, self.sanitize_text(self.merchant_name)),
+            self.get_value(self._ID_MERCHANT_CITY, self.sanitize_text(self.merchant_city)),
             self.get_additional_data_field_template(),
         )
 
         return "{}{}".format(payload, self.get_crc16(payload))
 
     def set_pixkey(self, pixkey: str):
+        # Limitar o tamanho da chave Pix
+        if len(pixkey) > 77:  # Tamanho máximo conforme especificação
+            pixkey = pixkey[:77]
         self.pixkey = pixkey
 
     def set_description(self, description: str):
+        # Limitar o tamanho da descrição
+        if len(description) > 72:  # Tamanho máximo conforme especificação
+            description = description[:72]
         self.description = description
 
     def set_merchant_name(self, merchant_name: str):
+        # Limitar o tamanho do nome do comerciante
+        if len(merchant_name) > 25:  # Tamanho máximo conforme especificação
+            merchant_name = merchant_name[:25]
         self.merchant_name = merchant_name
 
     def set_merchant_city(self, merchant_city: str):
+        # Limitar o tamanho da cidade
+        if len(merchant_city) > 15:  # Tamanho máximo conforme especificação
+            merchant_city = merchant_city[:15]
         self.merchant_city = merchant_city
 
     def set_country_code(self, country: str):
@@ -59,19 +76,28 @@ class Pix(object):
 
     def set_txid(self, txid: str):
         """Defines the transaction identifier."""
+        # Limitar o tamanho do identificador de transação
+        if len(txid) > 25:  # Tamanho máximo conforme especificação
+            txid = txid[:25]
         self.txid = txid
 
     def set_amount(self, amount: float):
-        """Defines the transaction amount"""
-        self.amount = str(amount)
+        """Defines the transaction amount with proper formatting"""
+        # Formato com exatamente duas casas decimais, sem zeros à esquerda
+        # Usar Decimal para garantir o arredondamento correto
+        from decimal import Decimal, ROUND_HALF_UP
+        # Converter para Decimal e arredondar para duas casas decimais
+        decimal_amount = Decimal(str(amount)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        self.amount = str(decimal_amount)
 
     def get_value(self, identify: str, value: str):
         """Concatenates the identifier and the value"""
         return "{}{}{}".format(identify, str(len(value)).zfill(2), value)
 
     def get_merchant_account_information(self):
+        # Usar letras maiúsculas para o domínio do Banco Central, conforme padrão do Bradesco
         gui = self.get_value(
-            self._ID_MERCHANT_ACCOUNT_INFORMATION_GUI, "br.gov.bcb.pix"
+            self._ID_MERCHANT_ACCOUNT_INFORMATION_GUI, "BR.GOV.BCB.PIX"
         )
         key = self.get_value(self._ID_MERCHANT_ACCOUNT_INFORMATION_KEY, self.pixkey)
         description = (
@@ -88,8 +114,14 @@ class Pix(object):
         )
 
     def get_additional_data_field_template(self):
-        txid = self.get_value(self._ID_ADDITIONAL_DATA_FIELD_TEMPLATE_TXID, self.txid)
-        return self.get_value(self._ID_ADDITIONAL_DATA_FIELD_TEMPLATE, txid)
+        # Formato do txid conforme o padrão do Bradesco
+        # O formato é: tamanho (2 dígitos) + "Identificador" + o valor do txid
+        if self.txid:
+            # Adicionar o prefixo "Identificador" antes do txid
+            txid_with_prefix = "Identificador" + self.txid
+            txid = self.get_value(self._ID_ADDITIONAL_DATA_FIELD_TEMPLATE_TXID, txid_with_prefix)
+            return self.get_value(self._ID_ADDITIONAL_DATA_FIELD_TEMPLATE, txid)
+        return ""
 
     def toHex(self, dec: float):
         digits = "0123456789ABCDEF"
@@ -99,8 +131,28 @@ class Pix(object):
             return digits[x]
         return self.toHex(rest) + digits[x]
 
+    def validate(self):
+        """Validates if all required fields are filled"""
+        if not self.pixkey:
+            raise ValueError("Pix key is required")
+        if not self.merchant_name:
+            raise ValueError("Merchant name is required")
+        if not self.merchant_city:
+            raise ValueError("Merchant city is required")
+        # O valor é opcional para QR codes estáticos
+
+    def sanitize_text(self, text: str):
+        """Remove special characters and accents"""
+        import unicodedata
+        # Normaliza e remove acentos
+        normalized = unicodedata.normalize('NFD', text)
+        result = ''.join(c for c in normalized if unicodedata.category(c) != 'Mn')
+        # Remove caracteres não alfanuméricos exceto espaços
+        result = ''.join(c for c in result if c.isalnum() or c.isspace())
+        return result
+
     def get_crc16(self, payload: str):
-        payload = "{}{}04".format(payload, self._ID_CRC16)
+        payload = "{}{}{}".format(payload, self._ID_CRC16, "04")
         crc = 0xFFFF
         for i in range(len(payload)):
             crc ^= ord(payload[i]) << 8

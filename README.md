@@ -3,7 +3,7 @@ Python Pix
 
 [![pypi](https://img.shields.io/pypi/v/pypix.svg)](https://pypi.org/project/pypix/)
 [![Build Status](https://travis-ci.com/dyohan9/python-pix.svg?branch=master)](https://travis-ci.com/dyohan9/python-pix)
-[![Python Version](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg)](https://www.python.org/)
+[![Python Version](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![License GPL-3.0](https://img.shields.io/badge/license-%20GPL--3.0-yellow.svg)](https://github.com/bothub-it/bothub-engine/blob/master/LICENSE)
 
 
@@ -18,11 +18,11 @@ You can install using [pip](https://pip.pypa.io/en/stable/):
 
 ### Supported Python Versions
 
-Python \>= 3.6
+Python >= 3.9
 
 ### Deprecated Python Versions
 
-Python == 2.7. Python 2.7 support will be removed on January 1, 2020.
+Python < 3.9
 
 Current Maintainers
 -------------------

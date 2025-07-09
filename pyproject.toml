@@ -1,20 +1,31 @@
 [tool.poetry]
 name = "pypix"
-version = "0.1.6"
+version = "0.2.0"
 description = "Python library for generating pix codes with CRC16 validation"
 authors = ["Daniel Yohan <dyohan9@gmail.com>"]
 readme = "README.md"
 license = "GPL-3.0 License"
 keywords = ["pix", "banco-central", "pagamento", "payment"]
 repository = "https://github.com/dyohan9/python-pix"
-classifiers = [ "Development Status :: 1 - Planning", "Intended Audience :: Developers", "License :: OSI Approved :: GNU General Public License v3 (GPLv3)", "Programming Language :: Python", "Programming Language :: Python :: 3.6", "Programming Language :: Python :: 3.7", "Programming Language :: Python :: 3.8", "Topic :: Software Development :: Libraries",]
+classifiers = [ 
+    "Development Status :: 4 - Beta", 
+    "Intended Audience :: Developers", 
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)", 
+    "Programming Language :: Python", 
+    "Programming Language :: Python :: 3.9", 
+    "Programming Language :: Python :: 3.10", 
+    "Programming Language :: Python :: 3.11", 
+    "Programming Language :: Python :: 3.12", 
+    "Topic :: Software Development :: Libraries",
+]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = ">=3.9,<3.13"
 
-[tool.poetry.dev-dependencies]
-flake8 = "^3.8.4"
-black = "^19.3b0"
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.1.0"
+black = "^23.7.0"
+pytest = "^7.4.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
